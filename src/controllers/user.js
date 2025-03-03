@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'; 
 import User from '../models/user.js';
 import { validateSignUpData } from '../utils/validation.js';
 
@@ -30,13 +31,37 @@ export const loginController = async (req, res) => {
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            throw new Error('Not a valid password');
-        } else {
+        if (isValidPassword) {
+            // TODO Create a JWT token
+            const token = await jwt.sign({ _id: user._id }, 'DEV@Tinder$2000');
+
+            // TODO Add a token to cookie and sent the response back to the user
+            res.cookie('token', token);
+
             res.send('User logged in successfully');
+        } else {
+            throw new Error('Not a valid password');
         }
     } catch (error) {
         res.status(400).send('ERROR: ', error.messgae); 
+    }
+}
+
+export const profileController = async (req, res) => {
+    try {
+        const { token } = req.cookies;
+        if (!token) {
+            throw new Error('Invalid Token');
+        }
+        const decodedMessage = await jwt.verify(token, 'DEV@Tinder$2000');
+        const user = await User.findById(decodedMessage._id);
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+        res.send(user);
+    } catch (error) {
+        
     }
 }
 
@@ -86,3 +111,4 @@ export const patchController = async (req, res) => {
         return res.status(400).send('UPDATE FAILED: ', err.messgae);
     }
 }
+
