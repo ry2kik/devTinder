@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken'; 
 import User from '../models/user.js';
 import { validateSignUpData } from '../utils/validation.js';
 
@@ -30,13 +29,15 @@ export const loginController = async (req, res) => {
             throw new Error('Invalid Credentials');
         }
 
-        const isValidPassword = await bcrypt.compare(password, user.password);
+        const isValidPassword = await user.validatePassword(password);
         if (isValidPassword) {
             // TODO Create a JWT token
-            const token = await jwt.sign({ _id: user._id }, 'DEV@Tinder$2000');
+            const token = await user.getJWT();
 
             // TODO Add a token to cookie and sent the response back to the user
-            res.cookie('token', token);
+            res.cookie('token', token, {
+                expires: new Date(Date.now() + 1 * 360000)
+            });
 
             res.send('User logged in successfully');
         } else {
@@ -49,19 +50,19 @@ export const loginController = async (req, res) => {
 
 export const profileController = async (req, res) => {
     try {
-        const { token } = req.cookies;
-        if (!token) {
-            throw new Error('Invalid Token');
-        }
-        const decodedMessage = await jwt.verify(token, 'DEV@Tinder$2000');
-        const user = await User.findById(decodedMessage._id);
-
-        if (!user) {
-            throw new Error("User not found");
-        }
+        const user = req.user;
         res.send(user);
     } catch (error) {
-        
+        res.status(400).send('ERROR: ', error.message);
+    }
+}
+
+export const connectionRequestController = async (req, res) => {
+    try {
+        const user = req.user;
+        res.send(user.firstName + ' is sending the connection Request');
+    } catch (error) {
+        res.status(400).send('ERROR: ' + error.messgae);
     }
 }
 
