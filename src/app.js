@@ -1,23 +1,27 @@
+import cors from 'cors';
 import express from 'express';
 import { configDotenv } from 'dotenv';
 import cookieParser from 'cookie-parser';
-import router from './routes/user.js';
+import authRouter from './routes/auth.js';
+import profileRouter from './routes/profile.js';
+import requestRouter from './routes/requests.js';
 import connectDB from './config/database.js';
 const app = express();
 
 // ! To parse incoming requests with JSON payloads
 app.use(express.json());
 app.use(cookieParser());
-const port = process.env.PORT || 3000;
+app.use(cors({
+    // ? Whitelisting the domain
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 configDotenv();
-app.use(router);
+const port = process.env.PORT || 3000;
 
-// app.get('/profile', async (req, res) => {
-//     const cookies = req.cookies;
-//     console.log(cookies);
-
-//     res.send('Reading Cookies');
-// })
+app.use('/', authRouter);
+app.use('/', profileRouter);
+app.use('/', requestRouter);
 
 connectDB().then(() => {
     console.log('Database connection established successfully');

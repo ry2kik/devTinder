@@ -15,7 +15,7 @@ export const signupController = async (req, res) => {
         const user = new User({ firstName, lastName, emailId, password: passwordHash });
         await user.save();
         res.status(200).send('User added successfully');
-    } catch(err) {
+    } catch (err) {
         res.status(400).send('Error in saving user: ', err.messgae);
     }
 }
@@ -24,7 +24,7 @@ export const loginController = async (req, res) => {
     try {
         const { emailId, password } = req.body;
         const user = await User.findOne({ emailId });
- 
+
         if (!user) {
             throw new Error('Invalid Credentials');
         }
@@ -39,77 +39,67 @@ export const loginController = async (req, res) => {
                 expires: new Date(Date.now() + 1 * 360000)
             });
 
-            res.send('User logged in successfully');
+            res.send(user);
         } else {
             throw new Error('Not a valid password');
         }
     } catch (error) {
-        res.status(400).send('ERROR: ', error.messgae); 
+        res.status(400).send('ERROR: ', error.messgae);
     }
 }
 
-export const profileController = async (req, res) => {
-    try {
-        const user = req.user;
-        res.send(user);
-    } catch (error) {
-        res.status(400).send('ERROR: ', error.message);
-    }
+export const logoutController = async (req, res) => {
+    res.cookie('token', null, {
+        expires: new Date(Date.now())
+    });
+
+    res.send('LOGOUT successfully');
 }
 
-export const connectionRequestController = async (req, res) => {
-    try {
-        const user = req.user;
-        res.send(user.firstName + ' is sending the connection Request');
-    } catch (error) {
-        res.status(400).send('ERROR: ' + error.messgae);
-    }
-}
+// export const getUsers = async (req, res) => {
+//     const emailId = req.body.emailId;
 
-export const getUsers = async (req, res) => {
-    const emailId = req.body.emailId;
+//     try {
+//         const users = await User.find({ emailId: emailId });
+//         res.status(200).send(users);
+//     } catch (error) {
+//         res.status(400).send(error.messgae);
+//     }
+// }
 
-    try {
-        const users = await User.find({ emailId: emailId });
-        res.status(200).send(users);
-    } catch (error) {
-        res.status(400).send(error.messgae);
-    }
-}
+// export const feedController = async (req, res) => {
+//     try {
+//         const user = await User.find({});
+//         res.status(200).send(user);
+//     } catch (error) {
+//         res.status(400).send(error.messgae);
+//     }
+// }
 
-export const feedController = async (req, res) => {
-    try {
-        const user = await User.find({});
-        res.status(200).send(user);
-    } catch (error) {
-        res.status(400).send(error.messgae);
-    }
-}
+// export const patchController = async (req, res) => {
+//     const userId = req.params.userId;
+//     const data = req.body;
 
-export const patchController = async (req, res) => {
-    const userId = req.params.userId;
-    const data = req.body;
+//     try {
+//         const ALLOWED_UPDATE_FILELDS = ['userId', 'age', 'gender', 'photoUrl', 'about', 'skills'];
+//         const isUpdateAllowed = Object.keys(data).every(k => ALLOWED_UPDATE_FILELDS.includes(k));
+//         if (!isUpdateAllowed) {
+//             throw new Error('Update not allowed');
+//         }
 
-    try {
-        const ALLOWED_UPDATE_FILELDS = ['userId', 'age', 'gender', 'photoUrl', 'about', 'skills'];
-        const isUpdateAllowed = Object.keys(data).every(k => ALLOWED_UPDATE_FILELDS.includes(k));
-        if (!isUpdateAllowed) {
-            throw new Error('Update not allowed');
-        }
+//         if (data.skills.length > 10) {
+//             throw new Error('Skilld cannot be more than 10');
+//         }
 
-        if (data.skills.length > 10) {
-            throw new Error('Skilld cannot be more than 10');
-        }
+//         const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+//             returnDocument: 'after',
+//             runValidators: true
+//         });
 
-        const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-            returnDocument: 'after',
-            runValidators: true
-        });
-
-        console.log(user);
-        return res.status(200).send('User updated successfully');
-    } catch(err) {
-        return res.status(400).send('UPDATE FAILED: ', err.messgae);
-    }
-}
+//         console.log(user);
+//         return res.status(200).send('User updated successfully');
+//     } catch (err) {
+//         return res.status(400).send('UPDATE FAILED: ', err.messgae);
+//     }
+// }
 
