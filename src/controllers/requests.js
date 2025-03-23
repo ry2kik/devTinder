@@ -1,4 +1,5 @@
 import ConnectionRequest from '../models/connectionRequest.js';
+import User from '../models/user.js';
 
 export const connectionRequestController = async (req, res) => {
     try {
@@ -19,8 +20,15 @@ export const connectionRequestController = async (req, res) => {
             })
         }
 
+        const existingUser = await User.findById(toUserId);
+        if (!existingUser) {
+            return res.status(400).json({
+                message: "User not found"
+            });            
+        }
+
         // ! If there is an existing Connection Request
-        const existingConnectionRequest = await connectionRequest.findOne({
+        const existingConnectionRequest = await ConnectionRequest.findOne({
             $or: [
                 { fromUserId, toUserId },
                 { fromUserId: toUserId, toUserId: fromUserId }
@@ -28,17 +36,17 @@ export const connectionRequestController = async (req, res) => {
         });
 
         if (existingConnectionRequest) {
-            return status(400).json({
+            return res.status(400).json({
                 message: 'Connection request already existed!!'
             })
         }
 
         const data = await connectionRequest.save();
         res.json({
-            message: 'Connection request sent successfully!',
+            message: (status == 'ignored') ? (fromUserId.firstName + " is " + status + ' your request') : (fromUserId.firstName + " is " + status +  ' in ' + toUserId.firstName),
             data
         });
     } catch (error) {
-        res.status(400).send('ERROR: ', error.message);
+        res.status(400).send('ERROR: ' + error.message);
     }
 }
