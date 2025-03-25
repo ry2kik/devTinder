@@ -21,6 +21,7 @@ export const connectionRequestController = async (req, res) => {
         }
 
         const existingUser = await User.findById(toUserId);
+        console.log(existingUser);
         if (!existingUser) {
             return res.status(400).json({
                 message: "User not found"
@@ -43,7 +44,7 @@ export const connectionRequestController = async (req, res) => {
 
         const data = await connectionRequest.save();
         res.json({
-            message: (status == 'ignored') ? (fromUserId.firstName + " is " + status + ' your request') : (fromUserId.firstName + " is " + status +  ' in ' + toUserId.firstName),
+            message: (status == 'ignored') ? (req.user.firstName + " is " + status + ' your request') : (req.user.firstName + " is " + status +  ' in ' + existingUser.firstName),
             data
         });
     } catch (error) {

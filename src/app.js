@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { configDotenv } from 'dotenv';
 import cookieParser from 'cookie-parser';
+import userRouter from './routes/user.js';
 import authRouter from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import requestRouter from './routes/requests.js';
@@ -19,6 +20,7 @@ app.use(cors({
 configDotenv();
 const port = process.env.PORT || 3000;
 
+app.use('/', userRouter);
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', requestRouter);
