@@ -1,4 +1,5 @@
 import express from 'express';
+import User from '../models/user.js';
 import { userAuth } from '../middlewares/auth.js';
 import ConnectionRequests from '../models/connectionRequest.js';
 const router = express.Router();
@@ -41,6 +42,36 @@ router.get('/user/connectons', userAuth, async (req, res) => {
             message: 'Here are all your connections',
             data
         });
+    } catch (error) {
+        res.status(400).send('ERROR: ' + error.messgae);
+    }
+});
+
+router.get('/feed', userAuth, async (req, res) => {
+    try {
+        const loggedInUser = req.user;
+        const connectionRequest = await ConnectionRequests.find({
+            $or: [
+                { fromUserId: loggedInUser._id },
+                { toUserId: loggedInUser._id }
+            ]
+        }).populate('toUserId', ['firstName', 'lastName']);
+
+        const hideUsersFromFeed = new Set();
+        connectionRequest.forEach((req) => {
+            hideUsersFromFeed.add(req.fromUserId.toString);
+            hideUsersFromFeed.add(req.toUserId.toString());
+        });
+
+        const users = await User({
+            $and: [
+                { _id: { $nin: Array.from(hideUsersFromFeed) }},
+                { _id: { $ne: loggedInUser._id }}
+            ]
+        });
+        console.log(users);
+        res.send(users);
+        // res.status(200).send(connectionRequest);
     } catch (error) {
         res.status(400).send('ERROR: ' + error.messgae);
     }

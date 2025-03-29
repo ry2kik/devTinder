@@ -6,7 +6,7 @@ export const userAuth = async (req, res, next) => {
         // TODO Read the token from the req.cookies
         const { token } = req.cookies;
         if (!token) {
-            throw new Error("Token is not valid!!");
+            return res.status(401).send('Please login first!!!');
         }
 
         // TODO Validate the token

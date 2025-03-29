@@ -41,10 +41,10 @@ export const loginController = async (req, res) => {
 
             res.send(user);
         } else {
-            throw new Error('Not a valid password');
+            res.status(400).json({ message: 'Invalid Credentials' });
         }
     } catch (error) {
-        res.status(400).send('ERROR: ', error.messgae);
+        res.status(400).send('Error' + error.message);
     }
 }
 
@@ -67,14 +67,6 @@ export const logoutController = async (req, res) => {
 //     }
 // }
 
-// export const feedController = async (req, res) => {
-//     try {
-//         const user = await User.find({});
-//         res.status(200).send(user);
-//     } catch (error) {
-//         res.status(400).send(error.messgae);
-//     }
-// }
 
 // export const patchController = async (req, res) => {
 //     const userId = req.params.userId;
