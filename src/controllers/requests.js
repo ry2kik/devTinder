@@ -21,7 +21,6 @@ export const connectionRequestController = async (req, res) => {
         }
 
         const existingUser = await User.findById(toUserId);
-        console.log(existingUser);
         if (!existingUser) {
             return res.status(400).json({
                 message: "User not found"

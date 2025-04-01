@@ -16,7 +16,7 @@ export const signupController = async (req, res) => {
         await user.save();
         res.status(200).send('User added successfully');
     } catch (err) {
-        res.status(400).send('Error in saving user: ', err.messgae);
+        res.status(400).send('Error in saving user: ' + err);
     }
 }
 

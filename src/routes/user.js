@@ -4,13 +4,15 @@ import { userAuth } from '../middlewares/auth.js';
 import ConnectionRequests from '../models/connectionRequest.js';
 const router = express.Router();
 
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
+
 router.get('/user/requests/received', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
         const connectionRequests = await ConnectionRequests.find({
             toUserId: loggedInUser._id,
             status: 'interested'
-        }).populate('fromUserId', ['firstName', 'lastName']);
+        }).populate('fromUserId', [USER_SAFE_DATA]);
 
         res.status(200).json({
             message: 'Data fetched successfully',
@@ -24,18 +26,19 @@ router.get('/user/requests/received', userAuth, async (req, res) => {
 router.get('/user/connectons', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
+
         const myConnections = await ConnectionRequests.find({
             $or: [
-                { fromUserId: loggedInUser._id, status: 'accepted' },
-                { toUserId: loggedInUser._id, status: 'accepted' }
+                { toUserId: loggedInUser._id, status: "accepted" },
+                { fromUserId: loggedInUser._id, status: "accepted" },
             ]
-        }).populate('fromUserId', ['firstName', 'lastName'])
-        .populate('toUserId', ['firstName', 'lastName']);
+        }).populate('fromUserId', [USER_SAFE_DATA])
+        .populate('toUserId', [USER_SAFE_DATA]);
 
         const data = myConnections.map(row => {
             if (row.fromUserId._id.toString() === loggedInUser._id.toString())
                 return row.toUserId;
-            row.fromUserId;
+            return row.fromUserId;
         });
 
         res.status(200).json({
@@ -55,21 +58,20 @@ router.get('/feed', userAuth, async (req, res) => {
                 { fromUserId: loggedInUser._id },
                 { toUserId: loggedInUser._id }
             ]
-        }).populate('toUserId', ['firstName', 'lastName']);
+        }).select('fromUserId toUserId');
 
         const hideUsersFromFeed = new Set();
         connectionRequest.forEach((req) => {
-            hideUsersFromFeed.add(req.fromUserId.toString);
+            hideUsersFromFeed.add(req.fromUserId.toString());
             hideUsersFromFeed.add(req.toUserId.toString());
         });
 
-        const users = await User({
+        const users = await User.find({
             $and: [
                 { _id: { $nin: Array.from(hideUsersFromFeed) }},
                 { _id: { $ne: loggedInUser._id }}
             ]
-        });
-        console.log(users);
+        }).select(USER_SAFE_DATA);
         res.send(users);
         // res.status(200).send(connectionRequest);
     } catch (error) {
