@@ -20,7 +20,10 @@ export const profileEditController = async (req, res) => {
         Object.keys(req.body).forEach(key => loggedinUser[key] = req.body[key]);
         await loggedinUser.save();
 
-        res.send("You've successfully edited your profile");
+        res.json({ 
+            message: "You've successfully edited your profile",
+            data: loggedinUser
+        });
     } catch (error) {
         res.status(400).send('ERROR: ' + error.message);
     }

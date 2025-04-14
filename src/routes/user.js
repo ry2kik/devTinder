@@ -23,7 +23,7 @@ router.get('/user/requests/received', userAuth, async (req, res) => {
     }
 });
 
-router.get('/user/connectons', userAuth, async (req, res) => {
+router.get('/user/connections', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
 
@@ -32,8 +32,8 @@ router.get('/user/connectons', userAuth, async (req, res) => {
                 { toUserId: loggedInUser._id, status: "accepted" },
                 { fromUserId: loggedInUser._id, status: "accepted" },
             ]
-        }).populate('fromUserId', [USER_SAFE_DATA])
-        .populate('toUserId', [USER_SAFE_DATA]);
+        }).populate('fromUserId', USER_SAFE_DATA)
+        .populate('toUserId', USER_SAFE_DATA);
 
         const data = myConnections.map(row => {
             if (row.fromUserId._id.toString() === loggedInUser._id.toString())
@@ -46,7 +46,7 @@ router.get('/user/connectons', userAuth, async (req, res) => {
             data
         });
     } catch (error) {
-        res.status(400).send('ERROR: ' + error.messgae);
+        res.status(400).send('ERROR: ' + error);
     }
 });
 
@@ -54,7 +54,7 @@ router.get('/feed', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        let limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
         limit = limit > 50 ? 50 : limit;
@@ -81,7 +81,7 @@ router.get('/feed', userAuth, async (req, res) => {
         res.send(users);
         // res.status(200).send(connectionRequest);
     } catch (error) {
-        res.status(400).send('ERROR: ' + error.messgae);
+        res.status(400).send('ERROR: ' + error);
     }
 })
 

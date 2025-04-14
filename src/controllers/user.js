@@ -36,7 +36,7 @@ export const loginController = async (req, res) => {
 
             // TODO Add a token to cookie and sent the response back to the user
             res.cookie('token', token, {
-                expires: new Date(Date.now() + 1 * 360000)
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
             });
 
             res.send(user);
