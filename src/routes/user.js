@@ -12,7 +12,7 @@ router.get('/user/requests/received', userAuth, async (req, res) => {
         const connectionRequests = await ConnectionRequests.find({
             toUserId: loggedInUser._id,
             status: 'interested'
-        }).populate('fromUserId', [USER_SAFE_DATA]);
+        }).populate('fromUserId', USER_SAFE_DATA);
 
         res.status(200).json({
             message: 'Data fetched successfully',

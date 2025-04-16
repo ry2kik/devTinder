@@ -55,6 +55,7 @@ export const requestReviewController = async (req, res) => {
     try {
         const loggedInUser = req.user;
         const { status, requestId } = req.params;
+        console.log(status + '   ' + requestId);
         
         const ALLOWED_STATUS = ['accepted', 'rejected'];
         if (!ALLOWED_STATUS.includes(status)) {

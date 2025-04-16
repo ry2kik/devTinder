@@ -13,8 +13,13 @@ export const signupController = async (req, res) => {
 
         // TODO Creating the new instance of the User Model
         const user = new User({ firstName, lastName, emailId, password: passwordHash });
-        await user.save();
-        res.status(200).send('User added successfully');
+        const newUser = await user.save();
+
+        const token = await user.getJWT();
+        res.cookie('token', token, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        });
+        res.status(200).json({ message: 'User added successfully', data: newUser });
     } catch (err) {
         res.status(400).send('Error in saving user: ' + err);
     }
@@ -44,7 +49,7 @@ export const loginController = async (req, res) => {
             res.status(400).json({ message: 'Invalid Credentials' });
         }
     } catch (error) {
-        res.status(400).send('Error' + error.message);
+        res.status(400).send('Error: ' + error.message);
     }
 }
 
@@ -55,43 +60,4 @@ export const logoutController = async (req, res) => {
 
     res.send('LOGOUT successfully');
 }
-
-// export const getUsers = async (req, res) => {
-//     const emailId = req.body.emailId;
-
-//     try {
-//         const users = await User.find({ emailId: emailId });
-//         res.status(200).send(users);
-//     } catch (error) {
-//         res.status(400).send(error.messgae);
-//     }
-// }
-
-
-// export const patchController = async (req, res) => {
-//     const userId = req.params.userId;
-//     const data = req.body;
-
-//     try {
-//         const ALLOWED_UPDATE_FILELDS = ['userId', 'age', 'gender', 'photoUrl', 'about', 'skills'];
-//         const isUpdateAllowed = Object.keys(data).every(k => ALLOWED_UPDATE_FILELDS.includes(k));
-//         if (!isUpdateAllowed) {
-//             throw new Error('Update not allowed');
-//         }
-
-//         if (data.skills.length > 10) {
-//             throw new Error('Skilld cannot be more than 10');
-//         }
-
-//         const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-//             returnDocument: 'after',
-//             runValidators: true
-//         });
-
-//         console.log(user);
-//         return res.status(200).send('User updated successfully');
-//     } catch (err) {
-//         return res.status(400).send('UPDATE FAILED: ', err.messgae);
-//     }
-// }
 
